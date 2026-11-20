@@ -32,10 +32,10 @@ CONTACT_TEXT = """
 Savollaringiz bo'lsa, biz bilan bog'laning:
 
 📧 Email: ecoulash@gmail.com
-📱 Telefon: +998 90 000 00 00
+📱 Telefon: +998 93 155 1008
 🌐 Vebsayt: ecoulash.uz
 
-👨‍💼 Admin: @ecoulash_admin
+👨‍💼 Admin: @Dilraboxon8
 """
 
 
