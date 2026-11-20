@@ -163,8 +163,9 @@ async def admin_volunteers(message: Message):
     text = f"🙋 <b>Ko'ngillilar ({len(volunteers)} ta):</b>\n\n"
     for i, v in enumerate(volunteers, 1):
         user_id, full_name, phone, skills, availability = v
+        noma_lum = "Noma'lum"
         text += (
-            f"{i}. <b>{full_name or 'Noma\'lum'}</b>\n"
+            f"{i}. <b>{full_name or noma_lum}</b>\n"
             f"   📱 {phone or '—'}\n"
             f"   💪 {skills}\n"
             f"   🗓️ {availability}\n\n"
@@ -221,7 +222,8 @@ async def remove_admin_start(message: Message, state: FSMContext):
     for i, a in enumerate(admins, 1):
         user_id, full_name, username = a
         uname = f"@{username}" if username else "—"
-        text += f"{i}. {full_name or 'Noma\'lum'} ({uname}) — <code>{user_id}</code>\n"
+        noma_lum = "Noma'lum"
+        text += f"{i}. {full_name or noma_lum} ({uname}) — <code>{user_id}</code>\n"
 
     text += "\nO'chirish uchun admin ID sini kiriting:"
 
