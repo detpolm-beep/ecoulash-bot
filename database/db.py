@@ -85,6 +85,13 @@ async def init_db():
 
         await db.commit()
 
+        # Migration: eski bazada phone ustuni bo'lmasa qo'shamiz
+        try:
+            await db.execute("ALTER TABLE users ADD COLUMN phone TEXT")
+            await db.commit()
+        except Exception:
+            pass  # Ustun allaqachon bor
+
 
 async def get_db():
     return aiosqlite.connect(DB_PATH)
