@@ -52,11 +52,11 @@ async def start_handler(message: Message, state: FSMContext):
     await add_user(user.id, user.username or "", user.full_name or "")
     await log_event("start", user.id)
 
-    # Foydalanuvchi ro'yxatdan o'tganmi tekshiramiz
+    # Foydalanuvchi bazada bormi va telefoni bormi tekshiramiz
     db_user = await get_user(user.id)
 
     # Telefon raqami yo'q bo'lsa — register qilamiz
-    if db_user and not db_user[4]:  # db_user[4] = phone
+    if not db_user or not db_user[4]:
         await state.set_state(RegisterForm.phone)
         await message.answer(
             f"🌿 Assalomu alaykum, <b>{user.full_name}</b>!\n\n"
