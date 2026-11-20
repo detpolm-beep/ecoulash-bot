@@ -17,25 +17,32 @@ class RegisterForm(StatesGroup):
     phone = State()
 
 
-ABOUT_TEXT = (
-    "🌿 <b>EcoUlash haqida</b>\n\n"
-    "EcoUlash — ekologik barqarorlik va ijtimoiy mas'uliyatni birlashtiruvchi innovatsion loyiha.\n\n"
-    "<b>Biz nima qilamiz?</b>\n"
-    "♻️ Foydalanilmayotgan buyumlarni yig'amiz\n"
-    "🤲 Ehtiyojmand oilalarga yetkazamiz\n"
-    "👷 Yoshlar uchun ish o'rinlari yaratamiz\n"
-    "🌱 Ekologik madaniyatni rivojlantiramiz\n\n"
-    "<b>Shiormiz:</b>\n"
-    "<i>Bir buyum — ikki karra foyda!\n"
-    "Tabiatga foyda, insonga yordam.</i>"
-)
+ABOUT_TEXT = """
+🌿 <b>EcoUlash haqida</b>
 
-CONTACT_TEXT = (
-    "📞 <b>Aloqa</b>\n\n"
-    "Savollaringiz bo'lsa, biz bilan bog'laning:\n\n"
-    "📱 Telefon: <b>+998 93 155 10 08</b>\n"
-    "👨‍💼 Telegram: <b>@Dilraboxon8</b>"
-)
+EcoUlash — ekologik barqarorlik va ijtimoiy mas'uliyatni birlashtiruvchi innovatsion loyiha.
+
+<b>Biz nima qilamiz?</b>
+♻️ Foydalanilmayotgan buyumlarni yig'amiz
+🤲 Ehtiyojmand oilalarga yetkazamiz
+👷 Yoshlar uchun ish o'rinlari yaratamiz
+🌱 Ekologik madaniyatni rivojlantiramiz
+
+<b>Bizning shiormiz:</b>
+<i>Bir buyum — ikki karra foyda!
+Tabiatga foyda, insonga yordam.</i>
+
+🌍 EcoUlash — buyumlarga ikkinchi hayot, insonlarga yangi imkoniyat!
+"""
+
+CONTACT_TEXT = """
+📞 <b>Aloqa</b>
+
+Savollaringiz bo'lsa, biz bilan bog'laning:
+
+📱 Telefon: <b>+998 93 155 10 08</b>
+👨‍💼 Telegram: <b>@Dilraboxon8</b>
+"""
 
 
 @router.message(CommandStart())
@@ -51,8 +58,9 @@ async def start_handler(message: Message, state: FSMContext):
     if not phone:
         await state.set_state(RegisterForm.first_name)
         await message.answer(
-            "EcoUlash botiga xush kelibsiz!\n\n"
-            "Ro'yxatdan o'tish uchun ismingizni kiriting:",
+            f"🌿 <b>EcoUlash botiga xush kelibsiz!</b>\n\n"
+            f"Davom etish uchun ro'yxatdan o'ting.\n\n"
+            f"👤 Ismingizni kiriting:",
             reply_markup=cancel_button()
         )
         return
@@ -64,13 +72,17 @@ async def start_handler(message: Message, state: FSMContext):
 async def register_first_name(message: Message, state: FSMContext):
     if message.text == "❌ Bekor qilish":
         await state.clear()
-        await message.answer("Botdan foydalanish uchun ro'yxatdan o'ting.", reply_markup=cancel_button())
+        await message.answer(
+            "⚠️ Botdan foydalanish uchun ro'yxatdan o'ting.\n/start buyrug'ini yuboring.",
+            reply_markup=cancel_button()
+        )
         return
 
     await state.update_data(first_name=message.text)
     await state.set_state(RegisterForm.last_name)
     await message.answer(
-        "Ism: " + message.text + "\n\nFamiliyangizni kiriting:",
+        f"✅ Ism: <b>{message.text}</b>\n\n"
+        f"👤 Familiyangizni kiriting:",
         reply_markup=cancel_button()
     )
 
@@ -80,13 +92,14 @@ async def register_last_name(message: Message, state: FSMContext):
     if message.text == "❌ Bekor qilish":
         await state.clear()
         await state.set_state(RegisterForm.first_name)
-        await message.answer("Ismingizni kiriting:", reply_markup=cancel_button())
+        await message.answer("👤 Ismingizni kiriting:", reply_markup=cancel_button())
         return
 
     await state.update_data(last_name=message.text)
     await state.set_state(RegisterForm.phone)
     await message.answer(
-        "Familiya: " + message.text + "\n\nTelefon raqamingizni ulashing:",
+        f"✅ Familiya: <b>{message.text}</b>\n\n"
+        f"📱 Telefon raqamingizni ulashing 👇",
         reply_markup=phone_keyboard()
     )
 
@@ -105,11 +118,11 @@ async def register_phone(message: Message, state: FSMContext):
     await state.clear()
 
     await message.answer(
-        "✅ <b>Ro'yxatdan muvaffaqiyatli o'tdingiz!</b>\n\n"
-        "👤 Ism: <b>" + first_name + "</b>\n"
-        "👤 Familiya: <b>" + last_name + "</b>\n"
-        "📱 Telefon: <b>" + phone + "</b>\n\n"
-        "🌿 Xush kelibsiz!",
+        f"🎉 <b>Ro'yxatdan muvaffaqiyatli o'tdingiz!</b>\n\n"
+        f"👤 Ism: <b>{first_name}</b>\n"
+        f"👤 Familiya: <b>{last_name}</b>\n"
+        f"📱 Telefon: <b>{phone}</b>\n\n"
+        f"🌿 Xush kelibsiz!",
         reply_markup=main_menu()
     )
 
@@ -117,7 +130,7 @@ async def register_phone(message: Message, state: FSMContext):
 @router.message(RegisterForm.phone)
 async def register_phone_text(message: Message, state: FSMContext):
     await message.answer(
-        "Iltimos, tugmani bosib telefon raqamingizni ulashing:",
+        "📱 Iltimos, quyidagi tugmani bosib telefon raqamingizni ulashing:",
         reply_markup=phone_keyboard()
     )
 
@@ -127,12 +140,16 @@ async def show_main_menu(message: Message):
     is_admin = user.id in ADMIN_IDS
 
     await message.answer(
-        "🌿 Xush kelibsiz, <b>" + (user.full_name or "") + "</b>!\n\nMenyudan birini tanlang 👇",
+        f"🌿 Xush kelibsiz, <b>{user.full_name}</b>!\n\n"
+        f"Quyidagi menyudan birini tanlang 👇",
         reply_markup=main_menu()
     )
 
     if is_admin:
-        await message.answer("👑 <b>Admin panel:</b>", reply_markup=admin_menu())
+        await message.answer(
+            "👑 <b>Admin paneliga xush kelibsiz!</b>",
+            reply_markup=admin_menu()
+        )
 
 
 @router.message(F.text == "ℹ️ Loyiha haqida")
@@ -149,15 +166,17 @@ async def contact_handler(message: Message):
 
 @router.message(Command("help"))
 async def help_handler(message: Message):
-    help_text = (
-        "Yordam\n\n"
-        "/start — Botni qayta ishga tushirish\n"
-        "/help — Yordam\n\n"
-        "Menyular:\n"
-        "Ehson qilish\n"
-        "Yordam sorash\n"
-        "Mavjud buyumlar\n"
-        "Kongilli bolish\n"
-        "Statistika\n"
-    )
+    help_text = """
+🆘 <b>Yordam</b>
+
+/start — Botni qayta ishga tushirish
+/help — Yordam
+
+<b>Menyular:</b>
+♻️ <b>Ehson qilish</b> — Buyum ehson qiling
+🤲 <b>Yordam so'rash</b> — Buyum so'rang
+📦 <b>Mavjud buyumlar</b> — Ko'ring
+🙋 <b>Ko'ngilli bo'lish</b> — Ro'yxatdan o'ting
+📊 <b>Statistika</b> — Loyiha statistikasi
+"""
     await message.answer(help_text, reply_markup=main_menu())
