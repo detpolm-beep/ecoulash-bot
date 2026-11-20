@@ -52,21 +52,20 @@ async def start_handler(message: Message, state: FSMContext):
     await add_user(user.id, user.username or "", user.full_name or "")
     await log_event("start", user.id)
 
-    # Foydalanuvchi bazada bormi va telefoni bormi tekshiramiz
+    # Har doim telefon so'raymiz (bazada yo'q bo'lsa)
     db_user = await get_user(user.id)
+    phone = db_user[4] if db_user else None
 
-    # Telefon raqami yo'q bo'lsa — register qilamiz
-    if not db_user or not db_user[4]:
+    if not phone:
         await state.set_state(RegisterForm.phone)
         await message.answer(
             f"🌿 Assalomu alaykum, <b>{user.full_name}</b>!\n\n"
             f"EcoUlash botiga xush kelibsiz!\n\n"
-            f"Davom etish uchun telefon raqamingizni ulashing 👇",
+            f"📱 Davom etish uchun telefon raqamingizni ulashing 👇",
             reply_markup=phone_keyboard()
         )
         return
 
-    # Ro'yxatdan o'tgan — asosiy menyuni ko'rsatamiz
     await show_main_menu(message)
 
 
@@ -94,7 +93,12 @@ async def register_phone_contact(message: Message, state: FSMContext):
     contact: Contact = message.contact
     phone = contact.phone_number
 
-    await set_user_phone(message.from_user.id, phone)
+    try:
+        await set_user_phone(message.from_user.id, phone)
+    except Exception:
+        pass
+
+    await state.update_data(phone=phone)
     await state.clear()
     await log_event("registered", message.from_user.id, phone)
 
