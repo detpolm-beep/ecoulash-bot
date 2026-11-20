@@ -1,19 +1,20 @@
 import aiosqlite
 import os
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "ecoulash.db")
+DB_PATH = "/tmp/ecoulash.db"
 
 
 async def init_db():
-    """Barcha jadvallarni yaratadi"""
     async with aiosqlite.connect(DB_PATH) as db:
         # Foydalanuvchilar jadvali
         await db.execute("""
             CREATE TABLE IF NOT EXISTS users (
-                id          INTEGER PRIMARY KEY,
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id     INTEGER UNIQUE NOT NULL,
                 username    TEXT,
                 full_name   TEXT,
+                first_name  TEXT,
+                last_name   TEXT,
                 phone       TEXT,
                 role        TEXT DEFAULT 'user',
                 joined_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -52,23 +53,22 @@ async def init_db():
         # Ko'ngillilar jadvali
         await db.execute("""
             CREATE TABLE IF NOT EXISTS volunteers (
-                id          INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id     INTEGER UNIQUE NOT NULL,
-                skills      TEXT,
-                availability TEXT,
+                id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id       INTEGER UNIQUE NOT NULL,
+                skills        TEXT,
+                availability  TEXT,
                 registered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users(user_id)
             )
         """)
 
-        # Bildirishnomalar jadvali
+        # Adminlar jadvali
         await db.execute("""
-            CREATE TABLE IF NOT EXISTS notifications (
-                id          INTEGER PRIMARY KEY AUTOINCREMENT,
-                message     TEXT NOT NULL,
-                target      TEXT DEFAULT 'all',
-                sent_count  INTEGER DEFAULT 0,
-                created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            CREATE TABLE IF NOT EXISTS admins (
+                id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id    INTEGER UNIQUE NOT NULL,
+                added_by   INTEGER,
+                added_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
 
@@ -84,17 +84,6 @@ async def init_db():
         """)
 
         await db.commit()
-
-        # Migration: eski bazada phone ustuni bo'lmasa qo'shamiz
-        try:
-            await db.execute("ALTER TABLE users ADD COLUMN phone TEXT")
-            await db.commit()
-        except Exception:
-            pass  # Ustun allaqachon bor
-
-
-async def get_db():
-    return aiosqlite.connect(DB_PATH)
 
 
 # --- Foydalanuvchi funksiyalari ---
@@ -116,10 +105,20 @@ async def get_user(user_id: int):
             return await cursor.fetchone()
 
 
+async def update_user_info(user_id: int, first_name: str, last_name: str, phone: str):
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute("""
+            UPDATE users SET first_name = ?, last_name = ?, phone = ?,
+            full_name = ?
+            WHERE user_id = ?
+        """, (first_name, last_name, f"{first_name} {last_name}", phone, user_id))
+        await db.commit()
+
+
 async def get_all_users():
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute(
-            "SELECT user_id, username, full_name FROM users WHERE is_active = 1"
+            "SELECT user_id, username, full_name, phone FROM users WHERE is_active = 1"
         ) as cursor:
             return await cursor.fetchall()
 
@@ -139,6 +138,40 @@ async def set_user_phone(user_id: int, phone: str):
             "UPDATE users SET phone = ? WHERE user_id = ?", (phone, user_id)
         )
         await db.commit()
+
+
+# --- Admin funksiyalari ---
+
+async def get_admin_ids() -> list[int]:
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute("SELECT user_id FROM admins") as cursor:
+            rows = await cursor.fetchall()
+            return [row[0] for row in rows]
+
+
+async def add_admin(user_id: int, added_by: int):
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute("""
+            INSERT OR IGNORE INTO admins (user_id, added_by)
+            VALUES (?, ?)
+        """, (user_id, added_by))
+        await db.commit()
+
+
+async def remove_admin(user_id: int):
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute("DELETE FROM admins WHERE user_id = ?", (user_id,))
+        await db.commit()
+
+
+async def get_all_admins():
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute("""
+            SELECT a.user_id, u.full_name, u.username
+            FROM admins a
+            LEFT JOIN users u ON a.user_id = u.user_id
+        """) as cursor:
+            return await cursor.fetchall()
 
 
 # --- Ehson funksiyalari ---
@@ -202,6 +235,16 @@ async def add_volunteer(user_id: int, skills: str, availability: str):
             VALUES (?, ?, ?)
         """, (user_id, skills, availability))
         await db.commit()
+
+
+async def get_all_volunteers():
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute("""
+            SELECT v.user_id, u.full_name, u.phone, v.skills, v.availability
+            FROM volunteers v
+            LEFT JOIN users u ON v.user_id = u.user_id
+        """) as cursor:
+            return await cursor.fetchall()
 
 
 # --- Statistika funksiyalari ---

@@ -5,7 +5,6 @@ from aiogram.types import (
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 
-# ===== ASOSIY MENYU =====
 def main_menu() -> ReplyKeyboardMarkup:
     builder = ReplyKeyboardBuilder()
     builder.row(
@@ -26,7 +25,6 @@ def main_menu() -> ReplyKeyboardMarkup:
     return builder.as_markup(resize_keyboard=True)
 
 
-# ===== ADMIN MENYU =====
 def admin_menu() -> ReplyKeyboardMarkup:
     builder = ReplyKeyboardBuilder()
     builder.row(
@@ -42,54 +40,69 @@ def admin_menu() -> ReplyKeyboardMarkup:
         KeyboardButton(text="🙋 Ko'ngillilar")
     )
     builder.row(
+        KeyboardButton(text="➕ Admin qo'shish"),
+        KeyboardButton(text="➖ Admin o'chirish")
+    )
+    builder.row(
         KeyboardButton(text="🏠 Asosiy menyu")
     )
     return builder.as_markup(resize_keyboard=True)
 
 
-# ===== TELEFON RAQAM =====
 def phone_keyboard() -> ReplyKeyboardMarkup:
     builder = ReplyKeyboardBuilder()
-    builder.add(KeyboardButton(text="📱 Telefon raqamni ulashish", request_contact=True))
-    builder.add(KeyboardButton(text="⬅️ Orqaga"))
-    builder.adjust(1)
-    return builder.as_markup(resize_keyboard=True)
+    builder.add(KeyboardButton(
+        text="📱 Telefon raqamni ulashish",
+        request_contact=True
+    ))
+    return builder.as_markup(resize_keyboard=True, one_time_keyboard=True)
 
 
-# ===== ORQAGA TUGMA =====
-def back_button() -> ReplyKeyboardMarkup:
-    builder = ReplyKeyboardBuilder()
-    builder.add(KeyboardButton(text="⬅️ Orqaga"))
-    return builder.as_markup(resize_keyboard=True)
-
-
-# ===== BEKOR QILISH =====
 def cancel_button() -> ReplyKeyboardMarkup:
     builder = ReplyKeyboardBuilder()
     builder.add(KeyboardButton(text="❌ Bekor qilish"))
     return builder.as_markup(resize_keyboard=True)
 
 
-# ===== XABAR YUBORISH MAN'BASI =====
+def back_button() -> ReplyKeyboardMarkup:
+    builder = ReplyKeyboardBuilder()
+    builder.add(KeyboardButton(text="⬅️ Orqaga"))
+    return builder.as_markup(resize_keyboard=True)
+
+
 def broadcast_target_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(
-        InlineKeyboardButton(text="👥 Hamma foydalanuvchilarga", callback_data="broadcast_all")
+        InlineKeyboardButton(
+            text="👥 Hamma foydalanuvchilarga",
+            callback_data="broadcast_all"
+        )
     )
     builder.row(
-        InlineKeyboardButton(text="🙋 Ko'ngillilarga", callback_data="broadcast_volunteers")
+        InlineKeyboardButton(
+            text="🙋 Ko'ngillilarga",
+            callback_data="broadcast_volunteers"
+        )
     )
     builder.row(
-        InlineKeyboardButton(text="❌ Bekor qilish", callback_data="broadcast_cancel")
+        InlineKeyboardButton(
+            text="❌ Bekor qilish",
+            callback_data="broadcast_cancel"
+        )
     )
     return builder.as_markup()
 
 
-# ===== TASDIQLASH =====
 def confirm_kb(action: str) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(
-        InlineKeyboardButton(text="✅ Tasdiqlash", callback_data=f"confirm_{action}"),
-        InlineKeyboardButton(text="❌ Bekor qilish", callback_data=f"cancel_{action}")
+        InlineKeyboardButton(
+            text="✅ Tasdiqlash",
+            callback_data=f"confirm_{action}"
+        ),
+        InlineKeyboardButton(
+            text="❌ Bekor qilish",
+            callback_data=f"cancel_{action}"
+        )
     )
     return builder.as_markup()

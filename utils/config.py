@@ -11,4 +11,4 @@ ADMIN_IDS: list[int] = [
 ]
 
 if not BOT_TOKEN:
-    raise ValueError("❌ BOT_TOKEN topilmadi! .env faylini tekshiring.")
+    raise ValueError("BOT_TOKEN topilmadi! .env faylini tekshiring.")
