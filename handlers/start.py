@@ -1,21 +1,12 @@
 from aiogram import Router, F
-from aiogram.types import Message, Contact
+from aiogram.types import Message
 from aiogram.filters import CommandStart, Command
-from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import State, StatesGroup
 
-from database.db import add_user, get_user, update_user_info, log_event, get_admin_ids
-from keyboards.main_kb import main_menu, admin_menu, phone_keyboard, cancel_button
+from database.db import add_user, log_event
+from keyboards.main_kb import main_menu
 from utils.config import ADMIN_IDS
 
 router = Router()
-
-
-class RegisterForm(StatesGroup):
-    first_name = State()
-    last_name = State()
-    phone = State()
-
 
 ABOUT_TEXT = """
 🌿 <b>EcoUlash haqida</b>
@@ -40,121 +31,40 @@ CONTACT_TEXT = """
 
 Savollaringiz bo'lsa, biz bilan bog'laning:
 
-📱 Telefon: <b>+998 93 155 10 08</b>
-👨‍💼 Telegram: <b>@dilraboxon8</b>
+📧 Email: ecoulash@gmail.com
+📱 Telefon: +998 90 000 00 00
+🌐 Vebsayt: ecoulash.uz
+
+👨‍💼 Admin: @ecoulash_admin
 """
 
 
-async def is_admin(user_id: int) -> bool:
-    if user_id in ADMIN_IDS:
-        return True
-    db_admins = await get_admin_ids()
-    return user_id in db_admins
-
-
 @router.message(CommandStart())
-async def start_handler(message: Message, state: FSMContext):
-    await state.clear()
+async def start_handler(message: Message):
     user = message.from_user
     await add_user(user.id, user.username or "", user.full_name or "")
     await log_event("start", user.id)
 
-    db_user = await get_user(user.id)
+    is_admin = user.id in ADMIN_IDS
 
-    # Telefon yo'q bo'lsa register boshlaylik
-    if not db_user or not db_user[6]:  # db_user[6] = phone
-        await state.set_state(RegisterForm.first_name)
+    welcome_text = (
+        f"🌿 Assalomu alaykum, <b>{user.full_name}</b>!\n\n"
+        f"EcoUlash botiga xush kelibsiz!\n\n"
+        f"Bu bot orqali siz:\n"
+        f"♻️ Buyum ehson qilishingiz\n"
+        f"🤲 Yordam so'rashingiz\n"
+        f"📦 Mavjud buyumlarni ko'rishingiz\n"
+        f"🙋 Ko'ngilli bo'lishingiz mumkin!\n\n"
+        f"Quyidagi menyudan birini tanlang 👇"
+    )
+
+    await message.answer(welcome_text, reply_markup=main_menu())
+
+    if is_admin:
+        from keyboards.main_kb import admin_menu
         await message.answer(
-            f"🌿 Assalomu alaykum!\n\n"
-            f"EcoUlash botiga xush kelibsiz!\n\n"
-            f"Ro'yxatdan o'tish uchun ismingizni kiriting 👇",
-            reply_markup=cancel_button()
-        )
-        return
-
-    await show_main_menu(message)
-
-
-# --- REGISTER JARAYONI ---
-
-@router.message(RegisterForm.first_name)
-async def register_first_name(message: Message, state: FSMContext):
-    if message.text == "❌ Bekor qilish":
-        await state.clear()
-        await message.answer("Botdan foydalanish uchun ro'yxatdan o'ting.", reply_markup=cancel_button())
-        return
-
-    await state.update_data(first_name=message.text)
-    await state.set_state(RegisterForm.last_name)
-    await message.answer(
-        f"✅ Ism: <b>{message.text}</b>\n\nFamiliyangizni kiriting 👇",
-        reply_markup=cancel_button()
-    )
-
-
-@router.message(RegisterForm.last_name)
-async def register_last_name(message: Message, state: FSMContext):
-    if message.text == "❌ Bekor qilish":
-        await state.clear()
-        await state.set_state(RegisterForm.first_name)
-        await message.answer("Ismingizni kiriting 👇", reply_markup=cancel_button())
-        return
-
-    await state.update_data(last_name=message.text)
-    await state.set_state(RegisterForm.phone)
-    await message.answer(
-        f"✅ Familiya: <b>{message.text}</b>\n\n"
-        f"📱 Telefon raqamingizni ulashing 👇",
-        reply_markup=phone_keyboard()
-    )
-
-
-@router.message(RegisterForm.phone, F.contact)
-async def register_phone(message: Message, state: FSMContext):
-    contact: Contact = message.contact
-    phone = contact.phone_number
-    data = await state.get_data()
-
-    first_name = data.get("first_name", "")
-    last_name = data.get("last_name", "")
-
-    await update_user_info(message.from_user.id, first_name, last_name, phone)
-    await log_event("registered", message.from_user.id)
-    await state.clear()
-
-    await message.answer(
-        f"🎉 <b>Ro'yxatdan muvaffaqiyatli o'tdingiz!</b>\n\n"
-        f"👤 Ism: <b>{first_name}</b>\n"
-        f"👤 Familiya: <b>{last_name}</b>\n"
-        f"📱 Telefon: <b>{phone}</b>\n\n"
-        f"Xush kelibsiz! 🌿",
-        reply_markup=main_menu()
-    )
-
-
-@router.message(RegisterForm.phone)
-async def register_phone_text(message: Message, state: FSMContext):
-    await message.answer(
-        "📱 Iltimos, tugmani bosib telefon raqamingizni ulashing:",
-        reply_markup=phone_keyboard()
-    )
-
-
-# --- ASOSIY MENYU ---
-
-async def show_main_menu(message: Message):
-    user = message.from_user
-    admin = await is_admin(user.id)
-
-    await message.answer(
-        f"🌿 Xush kelibsiz, <b>{user.full_name}</b>!\n\n"
-        f"Quyidagi menyudan birini tanlang 👇",
-        reply_markup=main_menu()
-    )
-
-    if admin:
-        await message.answer(
-            "👑 <b>Admin panel:</b>",
+            "👑 <b>Admin paneliga xush kelibsiz!</b>\n"
+            "Qo'shimcha admin buyruqlari:",
             reply_markup=admin_menu()
         )
 
@@ -176,12 +86,12 @@ async def help_handler(message: Message):
     help_text = (
         "🆘 <b>Yordam</b>\n\n"
         "/start — Botni qayta ishga tushirish\n"
-        "/help — Yordam\n\n"
+        "/help — Yordam\n"
+        "/stats — Statistika\n\n"
         "<b>Menyular:</b>\n"
-        "♻️ Ehson qilish\n"
-        "🤲 Yordam so'rash\n"
-        "📦 Mavjud buyumlar\n"
-        "🙋 Ko'ngilli bo'lish\n"
-        "📊 Statistika\n"
+        "♻️ <b>Ehson qilish</b> — Buyum ehson qiling\n"
+        "🤲 <b>Yordam so'rash</b> — Buyum so'rang\n"
+        "📦 <b>Mavjud buyumlar</b> — Ko'ring\n"
+        "🙋 <b>Ko'ngilli bo'lish</b> — Ro'yxatdan o'ting\n"
     )
     await message.answer(help_text, reply_markup=main_menu())
