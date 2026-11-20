@@ -112,7 +112,7 @@ async def get_user(user_id: int):
 async def get_all_users():
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute(
-            "SELECT user_id, username, full_name FROM users WHERE is_active = 1"
+            "SELECT user_id, username, full_name, phone FROM users WHERE is_active = 1"
         ) as cursor:
             return await cursor.fetchall()
 
@@ -130,6 +130,16 @@ async def set_user_phone(user_id: int, phone: str):
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute(
             "UPDATE users SET phone = ? WHERE user_id = ?", (phone, user_id)
+        )
+        await db.commit()
+
+
+async def update_user_info(user_id: int, first_name: str, last_name: str, phone: str):
+    async with aiosqlite.connect(DB_PATH) as db:
+        full_name = first_name + " " + last_name
+        await db.execute(
+            "UPDATE users SET full_name = ?, phone = ? WHERE user_id = ?",
+            (full_name, phone, user_id)
         )
         await db.commit()
 

@@ -42,6 +42,9 @@ def admin_menu() -> ReplyKeyboardMarkup:
         KeyboardButton(text="🙋 Ko'ngillilar")
     )
     builder.row(
+        KeyboardButton(text="📝 Ro'yxatdan o'tganlar")
+    )
+    builder.row(
         KeyboardButton(text="🏠 Asosiy menyu")
     )
     return builder.as_markup(resize_keyboard=True)

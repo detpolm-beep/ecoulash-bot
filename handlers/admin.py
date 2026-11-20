@@ -136,6 +136,31 @@ async def admin_requests(message: Message):
     await message.answer(text, reply_markup=admin_menu())
 
 
+# ===== RO'YXATDAN O'TGANLAR =====
+@router.message(F.text == "📝 Ro'yxatdan o'tganlar")
+async def admin_registered(message: Message):
+    if not is_admin(message.from_user.id):
+        return
+
+    users = await get_all_users()
+    registered = [u for u in users if u[3]]  # phone bor bo'lganlar
+
+    if not registered:
+        await message.answer("Ro'yxatdan o'tganlar yo'q.", reply_markup=admin_menu())
+        return
+
+    lines = ["Royxatdan otganlar: " + str(len(registered)) + " ta", ""]
+    for i, user in enumerate(registered[:30], 1):
+        user_id, username, full_name, phone = user
+        uname = "@" + username if username else "-"
+        lines.append(str(i) + ". " + str(full_name) + " | " + str(phone) + " | " + uname)
+
+    if len(registered) > 30:
+        lines.append("...va yana " + str(len(registered) - 30) + " ta")
+
+    await message.answer("\n".join(lines), reply_markup=admin_menu())
+
+
 # ===== XABAR YUBORISH (BROADCAST) =====
 @router.message(F.text == "📢 Xabar yuborish")
 async def broadcast_start(message: Message, state: FSMContext):
