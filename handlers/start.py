@@ -31,11 +31,8 @@ CONTACT_TEXT = """
 
 Savollaringiz bo'lsa, biz bilan bog'laning:
 
-📧 Email: ecoulash@gmail.com
-📱 Telefon: +998 93 155 1008
-🌐 Vebsayt: ecoulash.uz
-
-👨‍💼 Admin: @Dilraboxon8
+ Telefon: +998 93 155 10 08
+👨‍💼 Telegram: @Dilraboxon8
 """
 
 
