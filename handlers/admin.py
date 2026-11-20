@@ -166,9 +166,9 @@ async def admin_volunteers(message: Message):
         noma_lum = "Noma'lum"
         text += (
             f"{i}. <b>{full_name or noma_lum}</b>\n"
-            f"   📱 {phone or '—'}\n"
-            f"   💪 {skills}\n"
-            f"   🗓️ {availability}\n\n"
+            f"   Tel: {phone or 'yoq'}\n"
+            f"   Koмak: {skills}\n"
+            f"   Vaqt: {availability}\n\n"
         )
 
     await message.answer(text, reply_markup=admin_menu())
