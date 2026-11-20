@@ -18,22 +18,23 @@ class RegisterForm(StatesGroup):
 
 
 ABOUT_TEXT = (
-    "EcoUlash haqida\n\n"
+    "🌿 <b>EcoUlash haqida</b>\n\n"
     "EcoUlash — ekologik barqarorlik va ijtimoiy mas'uliyatni birlashtiruvchi innovatsion loyiha.\n\n"
-    "Biz nima qilamiz?\n"
-    "Foydalanilmayotgan buyumlarni yig'amiz\n"
-    "Ehtiyojmand oilalarga yetkazamiz\n"
-    "Yoshlar uchun ish o'rinlari yaratamiz\n"
-    "Ekologik madaniyatni rivojlantiramiz\n\n"
-    "Shiormiz: Bir buyum — ikki karra foyda!\n"
-    "Tabiatga foyda, insonga yordam."
+    "<b>Biz nima qilamiz?</b>\n"
+    "♻️ Foydalanilmayotgan buyumlarni yig'amiz\n"
+    "🤲 Ehtiyojmand oilalarga yetkazamiz\n"
+    "👷 Yoshlar uchun ish o'rinlari yaratamiz\n"
+    "🌱 Ekologik madaniyatni rivojlantiramiz\n\n"
+    "<b>Shiormiz:</b>\n"
+    "<i>Bir buyum — ikki karra foyda!\n"
+    "Tabiatga foyda, insonga yordam.</i>"
 )
 
 CONTACT_TEXT = (
-    "Aloqa\n\n"
+    "📞 <b>Aloqa</b>\n\n"
     "Savollaringiz bo'lsa, biz bilan bog'laning:\n\n"
-    "Telefon: +998 93 155 10 08\n"
-    "Telegram: @Dilraboxon8"
+    "📱 Telefon: <b>+998 93 155 10 08</b>\n"
+    "👨‍💼 Telegram: <b>@Dilraboxon8</b>"
 )
 
 
@@ -104,11 +105,11 @@ async def register_phone(message: Message, state: FSMContext):
     await state.clear()
 
     await message.answer(
-        "Ro'yxatdan muvaffaqiyatli o'tdingiz!\n\n"
-        "Ism: " + first_name + "\n"
-        "Familiya: " + last_name + "\n"
-        "Telefon: " + phone + "\n\n"
-        "Xush kelibsiz!",
+        "✅ <b>Ro'yxatdan muvaffaqiyatli o'tdingiz!</b>\n\n"
+        "👤 Ism: <b>" + first_name + "</b>\n"
+        "👤 Familiya: <b>" + last_name + "</b>\n"
+        "📱 Telefon: <b>" + phone + "</b>\n\n"
+        "🌿 Xush kelibsiz!",
         reply_markup=main_menu()
     )
 
@@ -126,12 +127,12 @@ async def show_main_menu(message: Message):
     is_admin = user.id in ADMIN_IDS
 
     await message.answer(
-        "Xush kelibsiz, " + (user.full_name or "") + "!\n\nMenyudan birini tanlang:",
+        "🌿 Xush kelibsiz, <b>" + (user.full_name or "") + "</b>!\n\nMenyudan birini tanlang 👇",
         reply_markup=main_menu()
     )
 
     if is_admin:
-        await message.answer("Admin panel:", reply_markup=admin_menu())
+        await message.answer("👑 <b>Admin panel:</b>", reply_markup=admin_menu())
 
 
 @router.message(F.text == "ℹ️ Loyiha haqida")
