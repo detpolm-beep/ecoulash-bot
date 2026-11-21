@@ -128,6 +128,8 @@ async def register_phone(message: Message, state: FSMContext):
         reply_markup=main_menu()
     )
 
+    await show_main_menu(message)
+
 
 @router.message(RegisterForm.phone)
 async def register_phone_text(message: Message, state: FSMContext):
