@@ -39,7 +39,7 @@ def admin_menu() -> ReplyKeyboardMarkup:
     )
     builder.row(
         KeyboardButton(text="🎁 Ehsonlar"),
-        KeyboardButton(text="🙋 Ko'ngillilar")
+        KeyboardButton(text="👐 Ko'ngillilar ro'yxati")
     )
     builder.row(
         KeyboardButton(text="📝 Ro'yxatdan o'tganlar")

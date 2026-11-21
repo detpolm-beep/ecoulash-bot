@@ -148,7 +148,7 @@ async def admin_requests(message: Message):
 
 # ── KO'NGILLILAR ──────────────────────────────────────────────────────────────
 
-@router.message(F.text == "� Ko'ngillilar")
+@router.message(F.text == "👐 Ko'ngillilar ro'yxati")
 async def admin_volunteers(message: Message):
     if not is_admin(message.from_user.id):
         return
