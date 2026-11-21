@@ -53,7 +53,9 @@ async def start_handler(message: Message, state: FSMContext):
     await log_event("start", user.id)
 
     db_user = await get_user(user.id)
-    phone = db_user[6] if db_user and len(db_user) > 6 else None
+    # get_user: (id, user_id, username, full_name, phone, role, joined_at, is_active)
+    # phone = index 4
+    phone = db_user[4] if db_user else None
 
     if not phone:
         await state.set_state(RegisterForm.first_name)
